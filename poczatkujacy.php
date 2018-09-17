@@ -2,7 +2,11 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>efektywny-niemiecki.pl/tlumaczenia</title>
+    <title>efektywny-niemiecki.pl/poczatkujacy</title>
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
     <link href='https://fonts.googleapis.com/css?family=Squada One' rel='stylesheet' />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
     <link rel="stylesheet" type="text/css" href="css/topbarjs.css" />
@@ -13,6 +17,9 @@
     <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
     <script src="js/jQuery.js"></script>
     <script src="js/poczatkujacy.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.paypalobjects.com/api/checkout.js"></script>
 
 </head>
 
@@ -21,6 +28,8 @@
         sessionStorage.clear();
         var poczatkujacy_sklep = new Array();
     </script>
+    
+
     <script>
      function idk(){
         var costam =  <?php $var=rand(999999,9999999);
@@ -30,7 +39,6 @@
                 fclose($file);
                 //chmod($file,0777);
                                 echo $var;?>;
-        alert(costam);
         var nazwa = "transakcja_udana.php?naglowek=" + costam;
         var poziom = "0"; //poczatkujacy
         var ilosc_kursow = 0;
@@ -59,10 +67,70 @@
             <h1 style="font-size:45px;">Kursy dla początkujacych</h1>
         </div>
         <img src="resources/kurs.jpg" style="max-height:200px;"> </img><br><br>
-        <div class="jumbotron">
-        <h2>Na dole strony umieściliśmy link do płatności<br>od razu po zaksięgowaniu wpłaty wysyłamy państwu wybrane kursy e-mailem</h2>
-        <p style="color:grey;">e-mail jaki panstwo nam podają nie jest w zaden sposób przechowywany na naszych serwerach</p>
-        </div>        <hr>
+        <div class="jumbotron" style="background-color:black;color:white;">
+                                    <h2>Twoj Koszyk</h2>
+                                    <div id="paypal-button-container"></div>
+
+    <script>
+        paypal.Button.render({
+
+            env: 'sandbox', // sandbox | production
+
+            // PayPal Client IDs - replace with your own
+            // Create a PayPal app: https://developer.paypal.com/developer/applications/create
+            client: {
+                sandbox:    'AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4-8aqX3PiV8e1GWU6liB2CUXlkA59kJXE7M6R',
+                production: '<insert production client id>'
+            },
+
+            // Show the buyer a 'Pay Now' button in the checkout flow
+            commit: true,
+
+            // payment() is called when the button is clicked
+            payment: function(data, actions) {
+
+                // Make a call to the REST api to create the payment
+                return actions.payment.create({
+                    payment: {
+                        transactions: [
+                            {
+                                amount: { total: podsumowanie_platnosci(poczatkujacy_sklep), currency: 'PLN' }
+                            }
+                        ]
+                    }
+                });
+            },
+
+            onAuthorize: function(data, actions) {
+
+                return actions.payment.execute().then(function() {
+                    var liczba_losowa =  <?php $var=rand(999999,999999999);
+                    $nazwa_pliku = "file" . $var.".txt";
+                    $file = fopen($nazwa_pliku,'a');
+                    fwrite($file,$var);
+                    fclose($file);
+                    echo $var;?>;
+                var nazwa = "transakcja_udana.php?naglowek=" + liczba_losowa;
+                var poziom = "0"; //poczatkujacy
+                var ilosc_kursow = 0;
+                for(var i = 0; i < poczatkujacy_sklep.length;i=i+2){
+                    sessionStorage.setItem("produkt" + ilosc_kursow ,poczatkujacy_sklep[i]);
+                    ilosc_kursow++;
+                }
+                sessionStorage.setItem('ilosc_kursow', ilosc_kursow);
+                sessionStorage.setItem('poziom', 0);
+                window.location.href = nazwa;
+                        });
+                    }
+
+                }, '#paypal-button-container');
+
+    </script>
+                                    
+ <p id="podsumowanie"></p>
+ <br>
+</div>
+       <hr>
         
     <button class="line" id="czasownikPrzycisk" > czasowniki</button>
                                     <div class="tresc" id="czasowniki">
@@ -96,73 +164,9 @@
                                     
                                    
                                     </div><br><br>
-                                    <div class="jumbotron" style="background-color:black;color:white;">
-                                    <h2>Twoj Koszyk</h2>
-                                    <div id="paypal-button"></div>
-<script src="https://www.paypalobjects.com/api/checkout.js"></script>
-<script>
-paypal.Button.render({
-  env: 'sandbox',
-  client: {
-    sandbox: 'AQfSmmCM87n8iibRYjTuXix2LUU0mXjU7KzIYs80Zq0EB7DW5llgf6vdTa2AQr53cvxcRgXsuDtEij4j'
-  },
-  payment: function (data, actions) {
-    
-    return actions.payment.create({
-      transactions: [{
-        amount: {
-          total: podsumowanie_platnosci(poczatkujacy_sklep),
-          currency: 'PLN'
-        }
-      }]
-    });
-  },
-  onAuthorize: function (data, actions) {
-    return actions.payment.execute()
-      .then(function () {
-        var liczba =  <?php $var=rand(999999,9999999);
-                $nazwa_pliku = "file" . $var.".txt";
-                $file = fopen($nazwa_pliku,'a');
-                fwrite($file,$var);
-                fclose($file);
-                chmod($file,0777);
-                echo $var;?>;
-        alert(liczba);
-        var nazwa = "transakcja_udana.php?naglowek=" + liczba;
-        var poziom = "0"; //poczatkujacy
-        var ilosc_kursow = 0;
-        for(var i = 0; i < poczatkujacy_sklep.length;i=i+2){
-            sessionStorage.setItem("produkt" + ilosc_kursow ,poczatkujacy_sklep[i]);
-            ilosc_kursow++;
-        }
-        sessionStorage.setItem('ilosc_kursow', ilosc_kursow);
-        sessionStorage.setItem('poziom', 0);
-        window.location.href = nazwa;
-    });
-  }
-}, '#paypal-button');
-</script>
- <p id="podsumowanie"></p><br>
-         <!--Currency Converter widget by FreeCurrencyRates.com -->
-
-<div id='gcw_mainFyB1Kx0XQ' class='gcw_mainFyB1Kx0XQ'></div>
-<a id='gcw_siteFyB1Kx0XQ' href='https://freecurrencyrates.com/en/'>FreeCurrencyRates.com</a>
-<script>function reloadFyB1Kx0XQ(){ var sc = document.getElementById('scFyB1Kx0XQ');if (sc) sc.parentNode.removeChild(sc);sc = document.createElement('script');sc.type = 'text/javascript';sc.charset = 'UTF-8';sc.async = true;sc.id='scFyB1Kx0XQ';sc.src = 'https://freecurrencyrates.com/en/widget-horizontal?iso=PLNEURUSD&df=2&p=FyB1Kx0XQ&v=i&source=fcr&width=220&width_title=110&firstrowvalue=20.00&thm=666666,000000,333333,333333,FFFFFF,666666,555555,ffffff,ffffff&title=Na%20naszej%20stronie%20obowi%C4%85zuj%C4%85%20takie%20kursy&tzo=-120';var div = document.getElementById('gcw_mainFyB1Kx0XQ');div.parentNode.insertBefore(sc, div);} reloadFyB1Kx0XQ(); </script>
-<!-- put custom styles here: .gcw_mainFyB1Kx0XQ{}, .gcw_headerFyB1Kx0XQ{}, .gcw_ratesFyB1Kx0XQ{}, .gcw_sourceFyB1Kx0XQ{} -->
-<!--End of Currency Converter widget by FreeCurrencyRates.com -->
-                                   
-</div>
-    </div>
-    <?php 
-    require("bottom_bar.php");
-?>
-        <!--tresc-->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
-        </script>
-
-        <!-- Use downloaded version of Bootstrap -->
-        <script src="js/bootstrap.min.js">
-        </script>
+    <?php require("bottom_bar.php");?>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 </body>
 
 </html>
